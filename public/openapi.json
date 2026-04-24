@@ -1,0 +1,153 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AlgoForge API",
+    "description": "High-performance, serverless stock trading indicator & signal API. Provides RSI, MACD, Bollinger Bands, and automated strategy signals for quant developers.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "AlgoForge Support",
+      "url": "https://algo-forge-api.vercel.app"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://algo-forge-api.vercel.app",
+      "description": "Production edge server"
+    }
+  ],
+  "paths": {
+    "/api/indicator/rsi": {
+      "get": {
+        "tags": ["Indicators"],
+        "summary": "Relative Strength Index (RSI)",
+        "description": "Returns the RSI value for a given ticker or stock.",
+        "parameters": [
+          {
+            "name": "ticker",
+            "in": "query",
+            "required": true,
+            "description": "Stock ticker symbol (e.g., NVDA, AAPL)",
+            "schema": { "type": "string" },
+            "example": "NVDA"
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "description": "The lookback period for RSI calculation",
+            "schema": { "type": "integer", "default": 14 }
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "description": "Data interval (1m, 5m, 1h, 1d)",
+            "schema": { "type": "string", "default": "1d" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful RSI response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ticker": { "type": "string" },
+                    "value": { "type": "number" },
+                    "timestamp": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/strategy/rsi-reversion": {
+      "post": {
+        "tags": ["Strategies"],
+        "summary": "RSI Mean Reversion Signal",
+        "description": "Analyzes RSI and returns BUY/SELL/HOLD signals based on oversold/overbought conditions.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ticker": { "type": "string", "example": "TSLA" },
+                  "oversold": { "type": "integer", "default": 30 },
+                  "overbought": { "type": "integer", "default": 70 },
+                  "interval": { "type": "string", "default": "1d" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Strategy signal response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ticker": { "type": "string" },
+                    "signal": { "type": "string" },
+                    "rsi_value": { "type": "number" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/screener/custom": {
+      "post": {
+        "tags": ["Screener"],
+        "summary": "Custom Stock Screener",
+        "description": "Filters stocks within the NASDAQ 100 based on custom indicators and conditions.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "conditions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "indicator": { "type": "string", "example": "rsi" },
+                        "operator": { "type": "string", "example": "<=" },
+                        "value": { "type": "number", "example": 30 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Screener results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": { "type": "integer" },
+                    "results": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
